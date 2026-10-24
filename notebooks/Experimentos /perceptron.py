@@ -79,3 +79,62 @@ y_xor = np.array([0, 1, 1, 0])
 perceptron_xor = PerceptronVisual(learning_rate=0.2, epochs=8)
 print("\nEjecutando visualización para COMPUERTA XOR...")
 perceptron_xor.train_and_plot(X, y_xor, "Compuerta XOR (No Linealmente Separable)")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import numpy as np
+
+# Definir el número de colores dominantes que queremos encontrar (ej. K = 4)
+K = 4
+epochs = 10
+
+# 1. Inicializar centroides seleccionando K píxeles aleatorios de la matriz X
+np.random.seed(42)
+random_indices = np.random.choice(X.shape[0], K, replace=False)
+centroids = X[random_indices].astype(float)
+
+print(f"=== INICIANDO K-MEANS PARA CUANTIZACIÓN DE COLOR (K={K}) ===")
+print(f"Centroides iniciales (Colores RGB):\n{centroids.astype(int)}\n")
+
+for epoch in range(epochs):
+    # 2. CÁLCULO DE LA MATRIZ DE DISTANCIAS EUCLIDIANAS
+    # Distancia de cada píxel (N píxeles) a cada centroide (K centroides)
+    # Forma resultante: (N_píxeles, K)
+    distances = np.linalg.norm(X[:, np.newaxis] - centroids, axis=2)
+    
+    # 3. MATRIZ DE PERTENENCIA / ASIGNACIÓN
+    # Para cada píxel, determinamos el índice del centroide más cercano (menor distancia)
+    # Esto genera un vector de etiquetas de tamaño (N_píxeles,)
+    labels = np.argmin(distances, axis=1)
+    
+    # Opcional: Mostrar un resumen matemático de la pertenencia en la primera época
+    if epoch == 0:
+        print(f"Dimensiones de la matriz de distancias: {distances.shape}")
+        print(f"Primeros 5 registros de la Matriz de Pertenencia (Asignación a cluster): {labels[:5]}")
+        print("-" * 60)
+        
+    # 4. ACTUALIZACIÓN DE CENTROIDES (Mover al centro de masa del cluster)
+    new_centroids = np.array([X[labels == i].mean(axis=0) for i in range(K)])
+    
+    # Condición de convergencia (si los centroides ya no se mueven)
+    if np.allclose(centroids, new_centroids):
+        print(f"¡K-Means convergió matemáticamente en la época {epoch + 1}!")
+        break
+        
+    centroids = new_centroids
+    print(f"Época {epoch + 1}: Centroides actualizados:\n{centroids.astype(int)}\n")
+
+print("¡Proceso de agrupamiento por K-Means completado con éxito!")
